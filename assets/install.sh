@@ -72,7 +72,7 @@ fi
 #  opendkim
 #############
 
-if [[ -z "$(find /etc/opendkim/domainkeys -iname *.private)" ]]; then
+if [[ -z "$(find /etc/opendkim/domainkeys/first -iname *.private)" ]]; then
   exit 0
 fi
 cat >> /etc/supervisor/conf.d/supervisord.conf <<EOF
@@ -119,12 +119,16 @@ localhost
 192.168.0.1/24
 
 *.$maildomain
+*.$maildomain2
 EOF
 cat >> /etc/opendkim/KeyTable <<EOF
-mail._domainkey.$maildomain $maildomain:mail:$(find /etc/opendkim/domainkeys -iname *.private)
+mail._domainkey.$maildomain $maildomain:mail:$(find /etc/opendkim/domainkeys/first -iname *.private)
+mail._domainkey.$maildomain2 $maildomain2:mail:$(find /etc/opendkim/domainkeys/second -iname *.private)
 EOF
 cat >> /etc/opendkim/SigningTable <<EOF
 *@$maildomain mail._domainkey.$maildomain
+*@$maildomain2 mail._domainkey.$maildomain2
 EOF
-chown opendkim:opendkim $(find /etc/opendkim/domainkeys -iname *.private)
-chmod 400 $(find /etc/opendkim/domainkeys -iname *.private)
+chown -R opendkim:opendkim $(find /etc/opendkim/domainkeys -iname *.private)
+chmod 400 $(find /etc/opendkim/domainkeys/first -iname *.private)
+chmod 400 $(find /etc/opendkim/domainkeys/second -iname *.private)
